@@ -1,0 +1,305 @@
+﻿SOURCE CODE:
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+class BeforeMyData {
+    int index;
+    String item;
+    int occurance;
+    public BeforeMyData(int index, String item, int occurance) {
+        this.index = index;
+        this.item = item;
+        this.occurance = occurance;
+    }
+
+    void setOccurance() {
+        occurance = occurance + 1;
+    }
+}
+
+class MyData {
+
+    int index;
+    String Item;
+    double Svalue;
+    double MIS;
+    int occurance;
+
+    public MyData(int index, String Item, double Svalue, double MIS, int occurnace) {
+        this.index = index;
+        this.Item = Item;
+        this.Svalue = Svalue;
+        this.MIS = MIS;
+        this.occurance = occurnace;
+    }
+}
+
+public class GetData {
+
+    /**
+     * @param args the command line arguments
+     */
+    public static String[] removeNull(String[] a) {
+        int nullCount = 0;
+        for (int i = 0; i < a.length; i++) {
+            if (a[i] == null) {
+                nullCount++;
+            }
+        }
+        String[] b = new String[a.length - nullCount];
+        int j = 0;
+        for (int i = 0; i < a.length; i++) {
+            if (a[i] != null) {
+                b[j++] = a[i];
+            }
+        }
+        return b;
+    }
+
+    public static void main(String[] args) {
+        int TotalRow;
+        int minSupport = 20;
+        double TotalTransactions = 200;
+        double averageSupport;
+    
+         String[][] Data = {
+         {"I1", "I2", "I5"},
+         {"I2", "I4"},
+         {"I2", "I3"},
+         {"I1", "I2", "I4"},
+         {"I1", "I3", "I6"},
+         {"I2", "I3"},
+         {"I1", "I3"},
+         {"I1", "I2", "I3", "I5"},
+         {"I1", "I2", "I3"}};
+
+
+        int x = 0;
+        String[] ModifiedData = new String[Data.length * Data.length];
+        for (int i = 0; i < Data.length; i++) {
+            for (int j = 0; j < Data[i].length; j++) {
+                //  System.out.println(Data[i][j]);
+                try {
+                    ModifiedData[x] = Data[i][j];
+                    x++;
+                } catch (Exception e) {
+                }
+            }
+        }
+        ModifiedData = removeNull(ModifiedData);
+        int i = 0, j = 0;
+        for (i = 0; i < ModifiedData.length; i++) {
+            System.out.println(ModifiedData[i]);
+        }
+        TotalRow = Data.length;
+        System.out.println(TotalRow);
+        averageSupport = (double) TotalTransactions / TotalRow;
+        System.out.println(averageSupport);
+
+        x = 2;
+
+        List<BeforeMyData> beforeData = new ArrayList<BeforeMyData>();
+        beforeData.add(new BeforeMyData(1, ModifiedData[0], 1));
+
+        for (i = 1; i < ModifiedData.length; i++) {
+            Iterator<BeforeMyData> itr = beforeData.iterator();
+            int has = 0, index = 0;
+            while (itr.hasNext()) {
+                BeforeMyData element = itr.next();
+                if (element.item.equals(ModifiedData[i])) {
+                    has = 1;
+
+                    element.setOccurance();
+                }
+            }
+            if (has == 1) {
+            } else {
+                beforeData.add(new BeforeMyData(x, ModifiedData[i], 1));
+                x++;
+            }
+        }
+        List<MyData> Table1 = new ArrayList<MyData>();
+
+
+        Iterator<BeforeMyData> itr = beforeData.iterator();
+        x = 1;
+
+        while (itr.hasNext()) {
+            BeforeMyData element = itr.next();
+            System.out.print("\n" + element.index + " " + element.item + " " + element.occurance);
+            double MIS = 0;
+            if ((((double) element.occurance / TotalRow) * 100) - averageSupport < averageSupport) {
+                MIS = ((double) element.occurance / TotalRow) * 100;
+            } else {
+                MIS = (((double) element.occurance / TotalRow) * 100) - averageSupport;
+            }
+            Table1.add(new MyData(x, element.item, (double) element.occurance / TotalRow * 100, MIS, element.occurance));
+            x++;
+        }
+
+
+        System.out.println("\n\nData In Table :");
+        Iterator<MyData> itrTable1 = Table1.iterator();
+        while (itrTable1.hasNext()) {
+            MyData element = itrTable1.next();
+            System.out.print("\n" + element.index + " " + element.Item + " " + element.Svalue + " " + element.MIS + " " + element.occurance);
+        }
+
+        System.out.print("\n" + Table1.size() + "\n");
+        x = 1;
+        MyData element1 = null, element2 = null;
+        List<MyData> Table2 = new ArrayList<MyData>();
+
+        Iterator<MyData> itri = Table1.iterator();
+
+        while (itri.hasNext()) {
+            element1 = itri.next();
+            Iterator<MyData> itrj = Table1.iterator();
+            while (itrj.hasNext()) {
+                element2 = itrj.next();
+                if (element1.index < element2.index) {
+                    int count = 0;
+                    String item;
+                    int found = 0;
+                    for (i = 0; i < Data.length; i++) {
+
+                        for (j = 0; j < Data[i].length; j++) {
+                            //  System.out.println(Data[i][j]);
+                            try {
+                                item = Data[i][j];
+                                if (item.equals(element1.Item)) {
+                                    found++;
+                                }
+                                if (item.equals(element2.Item)) {
+                                    found++;
+                                }
+                            } catch (Exception e) {
+                            }
+                        }
+                        if (found == 2) {
+                            count++;
+                        }
+                        found = 0;
+                    }
+                    double minMIS = 0;
+                    if (element1.MIS <= element2.MIS) {
+                        minMIS = element1.MIS;
+                    } else {
+                        minMIS = element2.MIS;
+                    }
+                    double MIS = 0;
+                    double svalue = (double) count / TotalRow * 100;
+
+                    if (minMIS > svalue) {
+                        MIS = svalue;
+                    } else {
+                        MIS = minMIS;
+                        Table2.add(new MyData(x, element1.Item + "," + element2.Item, svalue, MIS, count));
+                        x++;
+                    }
+
+
+
+                }
+            }
+        }
+        System.out.println("\nData int Table2");
+        Iterator<MyData> itrT2 = Table2.iterator();
+        MyData elementT2 = null;
+        while (itrT2.hasNext()) {
+            elementT2 = itrT2.next();
+            System.out.println(elementT2.index + " " + elementT2.Item + " " + elementT2.Svalue + " " + elementT2.MIS + " " + elementT2.occurance);
+        }
+        System.out.println(Table2.size());
+
+
+
+        x = 1;
+        element1 = null;
+        element2 = null;
+        List<MyData> Table3 = new ArrayList<MyData>();
+
+        Iterator<MyData> itrT2i = Table2.iterator();
+
+        while (itrT2i.hasNext()) {
+            element1 = itrT2i.next();
+            String[] parts1 = element1.Item.split(",", 2);
+            String p1string1 = parts1[0];
+            String p1string2 = parts1[1];
+            Iterator<MyData> itrT2j = Table2.iterator();
+            while (itrT2j.hasNext()) {
+                element2 = itrT2j.next();
+                String[] parts2 = element2.Item.split(",", 2);
+                String p2string1 = parts2[0];
+                String p2string2 = parts2[1];
+                if (p2string1.equals(p1string2)) {
+                    int count = 0;
+                    String item;
+                    int found = 0;
+                    for (i = 0; i < Data.length; i++) {
+
+                        for (j = 0; j < Data[i].length; j++) {
+                            //  System.out.println(Data[i][j]);
+                            try {
+                                item = Data[i][j];
+                                if (item.equals(p1string1)) {
+                                    found++;
+                                }
+                                if (item.equals(p1string2)) {
+                                    found++;
+                                }
+                                if (item.equals(p2string2)) {
+                                    found++;
+                                }
+                            } catch (Exception e) {
+                            }
+                        }
+                        if (found == 3) {
+                            count++;
+                        }
+                        found = 0;
+                    }
+                    double minMIS = 0;
+                    Iterator<MyData> itrRefTable1 = Table1.iterator();
+                    double MIS1 = 0, MIS2 = 0, MIS3 = 0;
+                    while (itrRefTable1.hasNext()) {
+                        MyData element = itrRefTable1.next();
+                        if (element.Item.equals(p1string1)) {
+                            MIS1 = element.MIS;
+                        }
+                        if (element.Item.equals(p1string2)) {
+                            MIS2 = element.MIS;
+                        }
+                        if (element.Item.equals(p2string2)) {
+                            MIS3 = element.MIS;
+                        }
+                    }
+
+
+                    minMIS = Math.min(Math.min(MIS1, MIS2), MIS3);
+
+                    double MIS = 0;
+                    double svalue = (double) count / TotalRow * 100;
+
+                    if (minMIS > svalue) {
+                        MIS = svalue;
+                    } else {
+                        MIS = minMIS;
+                        Table3.add(new MyData(x, element1.Item + "," + p2string2, svalue, MIS, count));
+                        x++;
+                    }
+
+
+                }
+            }
+        }
+        System.out.println("\nData in Table 3\n");
+        Iterator<MyData> itrT3 = Table3.iterator();
+        MyData elementT3 = null;
+        while (itrT3.hasNext()) {
+            elementT3 = itrT3.next();
+            System.out.println(elementT3.index + " " + elementT3.Item + " " + elementT3.Svalue + " " + elementT3.MIS + " " + elementT3.occurance);
+        }
+        System.out.println(Table3.size());
+    }
+}
